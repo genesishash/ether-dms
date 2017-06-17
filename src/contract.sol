@@ -10,8 +10,8 @@ contract DeadManSwitch
 
   address public owner;
   address public recipient;
-  uint public last_heartbeat;
-  uint public period_days;
+  uint public lastHeartbeat;
+  uint public periodDays;
 
   function() payable {}
 
@@ -20,23 +20,23 @@ contract DeadManSwitch
     owner = msg.sender;
 
     recipient = recipientAddress;
-    period_days = periodInDays * 1 minutes;
+    periodDays = periodInDays * 1 minutes;
 
-    last_heartbeat = now;
+    lastHeartbeat = now;
     Heartbeat(now);
   }
 
   modifier only_owner(){
     if(msg.sender!=owner) throw;
 
-    last_heartbeat = now;
+    lastHeartbeat = now;
     Heartbeat(now);
 
     _;
   }
 
   function process(){
-    if (now <= last_heartbeat + period_days) throw;
+    if (now <= lastHeartbeat + periodDays) throw;
     selfdestruct(recipient);
   }
 
@@ -55,7 +55,7 @@ contract DeadManSwitch
   }
 
   function changeInterval(uint periodInDays) only_owner {
-    period_days = periodInDays * 1 minutes;
+    periodDays = periodInDays * 1 minutes;
     IntervalChanged(periodInDays);
   }
 
