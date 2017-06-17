@@ -20,6 +20,9 @@ contract DeadSwitch
   uint public period_days;
 
   //
+  function() payable {}
+
+  //
   function DeadSwitch(address recipient_address,uint period_in_days){
     owner = msg.sender;
 
