@@ -4,7 +4,7 @@ contract DeadManSwitch
 {
   event Withdraw(uint _amount, address _address);
   event RecipientChanged(address _address);
-  event IntervalChanged(uint days);
+  event IntervalChanged(uint secs);
   event Heartbeat(uint unixTime);
 
   address public owner;
@@ -60,7 +60,7 @@ contract DeadManSwitch
 
   function changeInterval(uint periodInDays) only_owner {
     periodSeconds = periodInDays * 1 days;
-    IntervalChanged(periodInDays);
+    IntervalChanged(periodSeconds);
   }
 
   function kill() only_owner {
