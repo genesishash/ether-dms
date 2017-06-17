@@ -2,16 +2,16 @@ pragma solidity ^0.4.8;
 
 contract DeadManSwitch
 {
-  event RecipientChanged(address _addr);
-  event Withdraw(uint _amount, address _addr);
-  event Deposit(uint _amount, address _addr);
-  event IntervalChanged(uint _days);
-  event Heartbeat(uint _time);
+  event Withdraw(uint _amount, address _address);
+  event RecipientChanged(address _address);
+  event IntervalChanged(uint days);
+  event Heartbeat(uint unixTime);
 
   address public owner;
   address public recipient;
+
   uint public lastHeartbeat;
-  uint public periodDays;
+  uint public periodSeconds;
 
   function() payable {}
 
@@ -20,7 +20,7 @@ contract DeadManSwitch
     owner = msg.sender;
 
     recipient = recipientAddress;
-    periodDays = periodInDays * 1 minutes;
+    periodSeconds = periodInDays * 1 days;
 
     lastHeartbeat = now;
     Heartbeat(now);
@@ -35,8 +35,12 @@ contract DeadManSwitch
     _;
   }
 
+  // attempt to dump funds
   function process(){
-    if (now <= lastHeartbeat + periodDays) throw;
+
+    // throw if owner was active recently
+    if (now <= lastHeartbeat + periodSeconds) throw;
+
     selfdestruct(recipient);
   }
 
@@ -55,7 +59,7 @@ contract DeadManSwitch
   }
 
   function changeInterval(uint periodInDays) only_owner {
-    periodDays = periodInDays * 1 minutes;
+    periodSeconds = periodInDays * 1 days;
     IntervalChanged(periodInDays);
   }
 
