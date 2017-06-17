@@ -9,17 +9,16 @@ contract DeadSwitch
   event IntervalChanged(uint _days);
   event PayloadDumped(address _addr);
 
-  event Heartbeat();
-  event Ping();
+  event Heartbeat(uint _time);
+  event Ping(bool _dumped);
 
-  address owner;
-  address recipient;
+  address public owner;
+  address public recipient;
 
   uint public last_ping;
   uint public last_heartbeat;
   uint public period_days;
 
-  //
   function() payable {}
 
   //
@@ -32,30 +31,32 @@ contract DeadSwitch
     ContractCreated();
 
     last_heartbeat = now;
-    Heartbeat();
+    Heartbeat(now);
   }
 
   modifier only_owner(){
     if(msg.sender!=owner) throw;
-    last_heartbeat = now;
-    Heartbeat();
     _;
+    last_heartbeat = now;
+    Heartbeat(now);
   }
 
-  //
-  function ping(){
+  function ping() returns (bool){
     last_ping = now;
     Ping();
 
-    if (now <= last_heartbeat + period_days) throw;
+    if (now <= last_heartbeat + period_days){
+      return false;
+    }
 
     PayloadDumped(recipient);
     selfdestruct(recipient);
+
+    return true;
   }
 
-  function heartbeat() only_owner {
-    last_heartbeat = now;
-    Heartbeat();
+  function heartbeat() returns (bool) only_owner {
+    return true;
   }
 
   function withdraw(uint amount,address recipient_address) only_owner {
